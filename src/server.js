@@ -4,14 +4,11 @@ const fetch = require('node-fetch');
 
 let jsonData = JSON.parse(fs.readFileSync('data.json', 'utf-8'))
 
-console.log(jsonData['data'].length)
+// console.log(jsonData['data'].length)
 
-console.log(jsonData['data'][0]['repo'])
+// console.log(jsonData['data'][3]['repo'])
 
 const accessToken = '8669050a222e536506c9c0c453fef8a1e82141bc';
-var i;
-var score = 0;
-var stars;
 
 const query = `
 	query($author: String!, $repo: String!){
@@ -46,38 +43,93 @@ const query = `
 	`;
 
 var jdata;
-for(i = 0 ; i < 1 ; i++){
+var i,j;
+var score = 0;
+var stars;
+var botCheck;
+var botCount;
+
+
+async function gitData(){
+
+	for(i = 0 ; i < jsonData['data'].length ; i++){
   
-	const variables = {
-		author : jsonData['data'][i]['author'],
-		repo : jsonData['data'][i]['repo']
+		score = 0;
+		botCount = 0;
+		const variables = {
+			author : jsonData['data'][i]['author'],
+			repo : jsonData['data'][i]['repo']
+		}
+		await fetch('https://api.github.com/graphql', {
+		  method: 'POST',
+		  body: JSON.stringify({query, variables}),
+		  headers: {
+		    'Authorization': `Bearer ${accessToken}`,
+		    'Content-Type': 'application/json',
+		  },
+
+		}).then(res => 
+			res.text()
+			)
+		  .then(body => {
+		  	jdata = JSON.parse(body);
+		  	// console.log(jdata)
+		  	stars = jdata["data"]["repositoryOwner"]["repository"]["stargazers"]["totalCount"];
+		  	// console.log(stars)
+		  	score = score + starsResult(stars)
+		  	// console.log(score)
+		  	score = score + timeResult(jdata["data"]["repositoryOwner"]["repository"]["updatedAt"])
+		  	botCheck = jdata["data"]["repositoryOwner"]["repository"]["ref"]["target"]["history"]["edges"]
+		  	// console.log(score)
+		  	for(j = 0 ; j < 20 ; j++){
+		  		if((botCheck[j]["node"]["author"]["name"]).match(/bot/i)){
+		  			botCount++;
+		  			// console.log(botCheck[j]["node"]["author"]["name"])
+		  		}
+		  	}
+		  	score = score + botResult(botCount)
+		  	// console.log(botCount)
+		  	// console.log(t + " " + score)
+		  	console.log("Repository " + jsonData['data'][i]['repo'] + " scores : " + score + " points")
+
+		  })
+		  .catch(error => 
+		  	console.error(error)
+		  );
 	}
-	fetch('https://api.github.com/graphql', {
-	  method: 'POST',
-	  body: JSON.stringify({query, variables}),
-	  headers: {
-	    'Authorization': `Bearer ${accessToken}`,
-	    'Content-Type': 'application/json',
-	  },
-
-	}).then(res => 
-		res.text()
-		)
-	  .then(body => {
-	  	jdata = JSON.parse(body);
-	  	stars = jdata["data"]["repositoryOwner"]["repository"]["stargazers"]["totalCount"];
-
-	  	score = score + starsResult(stars)
-	  	score = score + timeResults(jdata["data"]["repositoryOwner"]["repository"]["updatedAt"])
-	  	console.log(score)
-	  })
-	  .catch(error => 
-	  	console.error(error)
-	  );
 }
 
+gitData()
 
-function timeResults(date){
+
+function botResult(botCount){
+	if(botCount == 0){
+		return 40
+	}
+	else if(botCount >=1 && botCount < 4){
+		return 35;
+	}
+	else if(botCount >=4 && botCount < 6){
+		return 30;
+	}
+	else if(botCount >=6 && botCount < 8){
+		return 25;
+	}
+	else if(botCount >=8 && botCount < 10){
+		return 20;
+	}
+	else if(botCount >=10 && botCount < 12){
+		return 15;
+	}
+	else if(botCount >=12 && botCount < 14){
+		return 10;
+	}
+	else{
+		return 0;
+	}
+}
+
+function timeResult(date){
 	var dateobj = new Date(date);
 	var currdate = new Date();
 	var diff;

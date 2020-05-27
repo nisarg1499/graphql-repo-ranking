@@ -15,6 +15,34 @@
 		{
 			"author" : "Urigo",
 			"repo" : "sofa"
+		},
+		{
+			"author" : "graphql",
+			"repo" : "graphql-language-service"
+		},
+		{
+			"author" : "dotansimha",
+			"repo" : "graphql-code-generator"
+		},
+		{
+			"author" : "kamilkisiela",
+			"repo" : "graphql-inspector"
+		},
+		{
+			"author" : "urigo",
+			"repo" : "graphql-cli"
+		},
+		{
+			"author" : "Urigo",
+			"repo" : "graphql-scalars"
+		},
+		{
+			"author" : "ardatan",
+			"repo" : "graphql-toolkit"
+		},
+		{
+			"author" : "kamilkisiela",
+			"repo" : "graphql-config"
 		}
 	]
 }
