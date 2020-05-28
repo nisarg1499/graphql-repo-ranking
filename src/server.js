@@ -22,7 +22,8 @@ const query = `
 	                node{
 	                  author{
 	                    name
-	                  }
+	                  },
+	                  pushedDate
 	                }
 	              }
 	            }
@@ -49,13 +50,18 @@ var stars;
 var botCheck;
 var botCount;
 
-
+var arr = [];
+var finalJson;
+var getTimeUpdated;
+var finalUpdatedTime;
+var maxStars = 0;
 async function gitData(){
 
 	for(i = 0 ; i < jsonData['data'].length ; i++){
   
 		score = 0;
 		botCount = 0;
+		getTimeUpdated = 0;
 		const variables = {
 			author : jsonData['data'][i]['author'],
 			repo : jsonData['data'][i]['repo']
@@ -73,25 +79,36 @@ async function gitData(){
 			)
 		  .then(body => {
 		  	jdata = JSON.parse(body);
-		  	// console.log(jdata)
 		  	stars = jdata["data"]["repositoryOwner"]["repository"]["stargazers"]["totalCount"];
-		  	// console.log(stars)
-		  	score = score + starsResult(stars)
-		  	// console.log(score)
-		  	score = score + timeResult(jdata["data"]["repositoryOwner"]["repository"]["updatedAt"])
+		  	// score = score + starsResult(stars)
+		  	// score = score + timeResult(jdata["data"]["repositoryOwner"]["repository"]["updatedAt"])
 		  	botCheck = jdata["data"]["repositoryOwner"]["repository"]["ref"]["target"]["history"]["edges"]
-		  	// console.log(score)
 		  	for(j = 0 ; j < 20 ; j++){
 		  		if((botCheck[j]["node"]["author"]["name"]).match(/bot/i)){
 		  			botCount++;
-		  			// console.log(botCheck[j]["node"]["author"]["name"])
+		  		}
+		  		else if(getTimeUpdated == 0){
+		  			finalUpdatedTime = botCheck[j]["node"]["pushedDate"];
+		  			getTimeUpdated = 1;
 		  		}
 		  	}
 		  	score = score + botResult(botCount)
-		  	// console.log(botCount)
-		  	// console.log(t + " " + score)
-		  	console.log("Repository " + jsonData['data'][i]['repo'] + " scores : " + score + " points")
-
+		  	score = score + timeResult(finalUpdatedTime)
+		  	// console.log("Repository " + jsonData['data'][i]['repo'] + " scores : " + score + " points")
+		  	finalJson = {
+		  		"repo" : jsonData['data'][i]['repo'],
+		  		"stars" : stars,
+		  		"score" : score
+		  	}
+		  	arr.push(finalJson)
+		  	// console.log(arr[i]["stars"])
+		  	if(maxStars < arr[i]["stars"]){
+		  		maxStars = arr[i]["stars"];
+		  		// console.log(maxStars)
+		  	}
+		  	// if (i == jsonData['data'].length - 1){
+		  	// 	return arr
+		  	// }
 		  })
 		  .catch(error => 
 		  	console.error(error)
@@ -99,8 +116,34 @@ async function gitData(){
 	}
 }
 
-gitData()
 
+//
+// Highest on the basis of stars
+// New history
+// Fetch Description
+
+
+// (async() => {
+// 	var re = await gitData()
+// 	console.log(re)
+// })()
+// async function main(){
+// 	const re = await gitData()
+// 	// console.log("HI")
+// 	console.log(re)
+// }
+// main()
+gitData().then(function(){
+	console.log(arr)
+	console.log(maxStars)
+})
+// console.log(out)
+// async function writeData(){
+// 	gitData()
+// 	console.log(arr)
+// }
+// writeData()
+// console.log(arr)
 
 function botResult(botCount){
 	if(botCount == 0){
