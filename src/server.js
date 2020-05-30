@@ -37,7 +37,8 @@ const query = `
 	      forkCount,
 	      pullRequests{
 	        totalCount
-	      }
+	      },
+	      description
 	    }
 	  }
 	}
@@ -97,6 +98,7 @@ async function gitData(){
 		  	// console.log("Repository " + jsonData['data'][i]['repo'] + " scores : " + score + " points")
 		  	finalJson = {
 		  		"repo" : jsonData['data'][i]['repo'],
+		  		"description" : jdata["data"]["repositoryOwner"]["repository"]["description"],
 		  		"stars" : stars,
 		  		"score" : score
 		  	}
@@ -134,8 +136,19 @@ async function gitData(){
 // }
 // main()
 gitData().then(function(){
-	console.log(arr)
+	// console.log(arr)
 	console.log(maxStars)
+	for(i = 0 ; i < jsonData['data'].length ; i++){
+		arr[i]["score"] = arr[i]["score"] + (100*arr[i]["stars"])/maxStars
+		// let saveData = JSON.stringify(arr[i]);
+		// fs.writeFile()
+		// console.log(score)
+	}
+	// console.log(arr)
+	// arr.sort(getSortData("score"))
+
+	console.log(arr)
+	// console.log(arr[0]["score"])
 })
 // console.log(out)
 // async function writeData(){
@@ -144,6 +157,18 @@ gitData().then(function(){
 // }
 // writeData()
 // console.log(arr)
+
+function getSortData(prop){
+	return function(a, b){
+		if(a[prop] > b[prop]){
+			return 1;
+		}
+		else if(a[prop] > b[prop]){
+			return -1;
+		}
+		return 0;
+	}
+}
 
 function botResult(botCount){
 	if(botCount == 0){
