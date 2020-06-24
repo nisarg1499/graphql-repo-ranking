@@ -8,7 +8,7 @@ let jsonData = JSON.parse(fs.readFileSync('data.json', 'utf-8'))
 
 // console.log(jsonData['data'][3]['repo'])
 
-const accessToken = '8669050a222e536506c9c0c453fef8a1e82141bc';
+const accessToken = 'github_access_token';
 
 const query = `
 	query($author: String!, $repo: String!){
